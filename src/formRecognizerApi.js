@@ -1,26 +1,34 @@
 // formRecognizerApi.js
 import axios from 'axios';
+const { AzureKeyCredential, DocumentAnalysisClient } = require("@azure/ai-form-recognizer");
 
-
-const endpoint = process.env.REACT_APP_FORM_RECOGNIZER_ENDPOINT;
-const apiKey = process.env.REACT_APP_FORM_RECOGNIZER_API_KEY;
+const endpoint = 'https://docappformrec.cognitiveservices.azure.com/';
+const apiKey = 'de0f6e8e3348496f9364d5b1b36aaca5';
 
 // Replace with your Form Recognizer API key
 
 const analyzeForm = async (file) => {
   try {
-    const url = `${endpoint}/formrecognizer/v2.1-preview.3/prebuilt/receipt/analyze`;
-    const headers = {
-      'Content-Type': 'image/jpeg/pdf', // Adjust based on your file type
-      'Ocp-Apim-Subscription-Key': apiKey,
-    };
-
-    const formData = new FormData();
-    formData.append('file', file);
-
-    const response = await axios.post(url, formData, { headers });
-    console.log(response.data); // Check if this logs the API response
-    return response.data;
+    console.log(file);
+    const client = new DocumentAnalysisClient(endpoint, new AzureKeyCredential(apiKey));
+ 
+    // const poller = await client.beginAnalyzeDocument("Form-Recogniser-Demo-1", file);
+    const poller = await client.beginAnalyzeDocumentFromUrl("sample-train-data",file);
+    console.log(poller.data);
+    const {documents} = await poller.pollUntilDone();
+ 
+    const document = documents && documents[0];
+    if (!document) {
+      throw new Error("Expected at least one document in the result.");
+    }
+ 
+    console.log(
+      "Extracted document:",
+      document.docType,
+      `(confidence: ${document.confidence || "<undefined>"})`
+    );
+    console.log("Fields:", document.fields);
+    return document.fields;
   } catch (error) {
     console.error('Error analyzing form:', error);
     throw error;
