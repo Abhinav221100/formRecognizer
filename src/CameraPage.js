@@ -1,6 +1,9 @@
 // CameraPage.js
-import React, { useRef, useState } from 'react';
+import axios from 'axios';
+import React, { useRef, useState, useEffect } from 'react';
 import { analyzeForm } from './formRecognizerApi';
+const CosmosClient = require('@azure/cosmos').CosmosClient;
+const config = require('./config')
 
 const CameraPage = () => {
   const videoRef = useRef(null);
@@ -9,6 +12,7 @@ const CameraPage = () => {
   const [query, setQuery] = useState('');
   const [queryResults, setQueryResults] = useState(null);
   const [loading, setLoading] = useState(false); // Add the loading state
+  const [cosmosDBResults, setCosmosDBResults] = useState([]);
 
   const startCamera = async () => {
     try {
@@ -44,6 +48,46 @@ const CameraPage = () => {
       }
     }
   };
+
+  // const fetchResultsFromCosmosDB = async () => 
+  //       { 
+  //           setLoading(true); 
+  //           try 
+  //           { 
+  //               const response = await axios.get('https://azplatformcdb.documents.azure.com:443/'); 
+  //               setCosmosDBResults(response.data); 
+  //               // Assuming the response data is an array of objects 
+  //               setLoading(false); 
+  //           } 
+  //           catch (error) 
+  //           { 
+  //               setLoading(false); 
+  //               console.error('Error fetching data from Cosmos DB:', error); 
+  //           } 
+  //       }; 
+  //       useEffect(() => { 
+  //           // Fetch data from Cosmos DB when the component mounts 
+  //           fetchResultsFromCosmosDB(); 
+  //       }, []
+  //       );
+
+
+  const testCosmosDB = async () =>
+  {
+    const endpoint = config.endpoint;
+    const cosmosKey = config.key;
+    console.log("Accessing Azure Cosmos.....");
+    const client = new CosmosClient({ endpoint, cosmosKey });
+    console.log("Cosmos DB accessed!");
+
+    const databaseId = config.database.id
+    const containerId = config.container.containerMessages
+
+    if(client.database(databaseId).container(containerId)){
+      console.log("accessing container");
+    }
+  }
+
 
   const handleQueryChange = (event) => {
     setQuery(event.target.value);
@@ -84,6 +128,7 @@ const CameraPage = () => {
         <div>
           <h3>Captured Image:</h3>
           <img src={URL.createObjectURL(capturedImage)} alt="Captured" />
+          <br></br>
           <button onClick={analyzeCapturedImage}>Analyze Image</button>
         </div>
       )}
@@ -91,9 +136,32 @@ const CameraPage = () => {
       {analysisResults && (
         <div>
           <h3>Analysis Results:</h3>
-          <pre>{JSON.stringify(analysisResults, null, 2)}</pre>
+          {/* <pre>{JSON.stringify(analysisResults, null, 2)}</pre> */}
+          {/* <table className="result-table">
+            <thead>
+              <tr>
+                <th>File Number</th>
+                <th>Mobile Number</th>
+                <th>Recharge MRP</th>
+                <th>Date and Time</th>
+                <th>Transaction ID</th>
+                <th>Payment Status</th>
+              </tr>
+            </thead>
+            <tbody>
+                <tr key="1">
+                  <td>1</td>
+                  <td>{cosmosDBResults["Mobile Number"]?.value}</td>
+                  <td>{cosmosDBResults["Recharge MRP"]?.value}</td>
+                  <td>{cosmosDBResults["Date and Time"]?.value}</td>
+                  <td>{cosmosDBResults["transaction ID"]?.value}</td>
+                  <td>{cosmosDBResults["Payment Status"]?.value}</td>
+                </tr>
+            </tbody>
+          </table> */}
         </div>
       )}
+      
       {/* ... (Same as before) */}
     </div>
   );
