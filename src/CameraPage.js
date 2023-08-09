@@ -1,18 +1,13 @@
 // CameraPage.js
-import axios from 'axios';
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState } from 'react';
 import { analyzeForm } from './formRecognizerApi';
-const CosmosClient = require('@azure/cosmos').CosmosClient;
-const config = require('./config')
 
 const CameraPage = () => {
   const videoRef = useRef(null);
   const [capturedImage, setCapturedImage] = useState(null);
   const [analysisResults, setAnalysisResults] = useState(null);
-  const [query, setQuery] = useState('');
-  const [queryResults, setQueryResults] = useState(null);
   const [loading, setLoading] = useState(false); // Add the loading state
-  const [cosmosDBResults, setCosmosDBResults] = useState([]);
+  const [errorVals, setErrorVals] = useState([]);
 
   const startCamera = async () => {
     try {
@@ -39,82 +34,33 @@ const CameraPage = () => {
       setLoading(true); // Set loading to true during analysis
       try {
         const formResults = await analyzeForm(capturedImage);
-        console.log('Form Results:', formResults);
+        const confidenceThreshold = 0.8;
+        console.log("Threshold set...");
+        const errorFields = [];
+        for(const fieldName in formResults) {
+          console.log("Checking threshold...");
+          const field = formResults[fieldName];
+          if (field.confidence < confidenceThreshold) {
+            console.log("Under Threshold...");
+            errorFields.push(fieldName);
+            // break;
+          }
+        }
+        setErrorVals(errorFields);
+
+        if (errorFields.length > 0) {
+          console.error('Error: Some fields have low confidence scores:', errorFields);
+          setAnalysisResults("null");
+        }
+        else{
         setAnalysisResults(formResults);
+        }
+        console.log("The analysisresult is ",analysisResults);
         setLoading(false); // Set loading to false after analysis
       } catch (error) {
         setLoading(false); // Set loading to false if an error occurs
         console.error('Error analyzing form:', error);
       }
-    }
-  };
-
-  // const fetchResultsFromCosmosDB = async () => 
-  //       { 
-  //           setLoading(true); 
-  //           try 
-  //           { 
-  //               const response = await axios.get('https://azplatformcdb.documents.azure.com:443/'); 
-  //               setCosmosDBResults(response.data); 
-  //               // Assuming the response data is an array of objects 
-  //               setLoading(false); 
-  //           } 
-  //           catch (error) 
-  //           { 
-  //               setLoading(false); 
-  //               console.error('Error fetching data from Cosmos DB:', error); 
-  //           } 
-  //       }; 
-  //       useEffect(() => { 
-  //           // Fetch data from Cosmos DB when the component mounts 
-  //           fetchResultsFromCosmosDB(); 
-  //       }, []
-  //       );
-
-
-  const testCosmosDB = async () =>
-  {
-    const endpoint = config.endpoint;
-    const cosmosKey = config.key;
-    console.log("Accessing Azure Cosmos.....");
-    const client = new CosmosClient({ endpoint, cosmosKey });
-    console.log("Cosmos DB accessed!");
-
-    const databaseId = config.database.id
-    const containerId = config.container.containerMessages
-
-    if(client.database(databaseId).container(containerId)){
-      console.log("accessing container");
-    }
-  }
-
-
-  const handleQueryChange = (event) => {
-    setQuery(event.target.value);
-  };
-
-  const handleQuerySubmit = async () => {
-    // ... (Same as before)
-
-    setLoading(true); // Set loading to true during query processing
-    try {
-      if (!analysisResults || !analysisResults.data) {
-        setQueryResults(null);
-        setLoading(false); // Set loading to false if no analysis results
-        return;
-      }
-
-      const matchedData = analysisResults.data.filter((item) => {
-        // ... (Same as before)
-      });
-
-      // ... (Same as before)
-
-      setLoading(false); // Set loading to false after query processing
-    } catch (error) {
-      setLoading(false); // Set loading to false if an error occurs during query
-      console.error('Error performing query:', error);
-      // Handle errors
     }
   };
 
@@ -136,33 +82,49 @@ const CameraPage = () => {
       {analysisResults && (
         <div>
           <h3>Analysis Results:</h3>
-          {/* <pre>{JSON.stringify(analysisResults, null, 2)}</pre> */}
-          {/* <table className="result-table">
-            <thead>
-              <tr>
-                <th>File Number</th>
-                <th>Mobile Number</th>
-                <th>Recharge MRP</th>
-                <th>Date and Time</th>
-                <th>Transaction ID</th>
-                <th>Payment Status</th>
-              </tr>
-            </thead>
-            <tbody>
-                <tr key="1">
-                  <td>1</td>
-                  <td>{cosmosDBResults["Mobile Number"]?.value}</td>
-                  <td>{cosmosDBResults["Recharge MRP"]?.value}</td>
-                  <td>{cosmosDBResults["Date and Time"]?.value}</td>
-                  <td>{cosmosDBResults["transaction ID"]?.value}</td>
-                  <td>{cosmosDBResults["Payment Status"]?.value}</td>
-                </tr>
-            </tbody>
-          </table> */}
+          {(() => {
+              if (analysisResults === "null") {
+                return (
+                  <div key="discarded">
+                    <p>The following fields have low confidence scores:
+                    {errorVals.map((errorField, ind) => (
+                      <ul>
+                        <li key={ind}>{errorField}</li>
+                      </ul>
+                      ))
+                    }</p>
+                    <p>The submitted file is not clear enough or does not meet the requirements for analysis. Please submit a clear copy or file of the right format.</p>
+                  </div>
+                )
+              } else {
+                return (
+                  <table className="result-table">
+                    <thead>
+                      <tr>
+                        <th>File Number</th>
+                        <th>Mobile Number</th>
+                        <th>Recharge MRP</th>
+                        <th>Date and Time</th>
+                        <th>Transaction ID</th>
+                        <th>Payment Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr key="1">
+                        <td>1</td>
+                        <td>{analysisResults["Mobile Number"]?.value}</td>
+                        <td>{analysisResults["Recharge MRP"]?.value}</td>
+                        <td>{analysisResults["Date and Time"]?.value}</td>
+                        <td>{analysisResults["transaction ID"]?.value}</td>
+                        <td>{analysisResults["Payment Status"]?.value}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                )
+              }
+            })()}
         </div>
       )}
-      
-      {/* ... (Same as before) */}
     </div>
   );
 };
