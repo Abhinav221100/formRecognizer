@@ -5,10 +5,12 @@
   "dependencies": {
     "@azure/ai-form-recognizer": "^4.0.0",
     "@azure/identity": "^3.2.4",
+    "@azure/search-documents": "^11.3.2",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.4.0",
+    "azure-sdk-for-js": "^0.0.1",
     "os-browserify": "^0.3.0",
     "path-browserify": "^1.0.1",
     "react": "^18.2.0",
