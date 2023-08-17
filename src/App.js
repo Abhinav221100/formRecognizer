@@ -5,6 +5,7 @@ import 'react-tabs/style/react-tabs.css';
 import FileUploadPage from './FileUploadPage';
 import CameraPage from './CameraPage';
 import SearchPage from './searchService';
+import TaxInvoicePage from './TaxInvoiceUpload';
 import './App.css'; // Import your global CSS file if you have any
 import './CameraPage.css';
 
@@ -24,6 +25,7 @@ const App = () => {
         </TabPanel>
         <TabPanel>
           <FileUploadPage />
+          <TaxInvoicePage />
         </TabPanel>
         <TabPanel>
           <SearchPage />

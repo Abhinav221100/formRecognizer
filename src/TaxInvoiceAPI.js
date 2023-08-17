@@ -15,7 +15,7 @@ const analyzeForm = async (file) => {
     const client = new DocumentAnalysisClient(endpoint, new AzureKeyCredential(apiKey));
  
     // const poller = await client.beginAnalyzeDocument("Form-Recogniser-Demo-1", file);
-    const poller = await client.beginAnalyzeDocumentFromUrl("analysis",file);
+    const poller = await client.beginAnalyzeDocumentFromUrl("taxinvoice",file);
     // const poller = await client.beginAnalyzeDocumentFromUrl("Form-Recogniser-Demo-1",file); //Pass ModelID and fileURL. Here fileURL is the file itself.
     const {documents} = await poller.pollUntilDone();
  
