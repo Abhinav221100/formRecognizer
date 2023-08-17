@@ -74,7 +74,11 @@ const FileUploadPage = () => {
                     <p>The submitted file is not clear enough or does not meet the requirements for analysis. Please submit a clear copy or file of the right format.</p>
                   </div>
                 )
-              } else {
+              }
+              if(result["Mobile Number"]?.value.length<10){
+                return(<p>Invalid Mobile Number! Please submit a file with valid data.</p>)
+              } 
+               else {
                 return (
                   <table className="result-table">
                     <thead>
