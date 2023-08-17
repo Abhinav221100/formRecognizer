@@ -114,28 +114,28 @@ const TaxInvoicePage = () => {
                         <table class="result-table">
                             <thead>
                                 <tr>
-                                    <th>Amount</th>
                                     <th>Quantity</th>
-                                    <th>Unit Price</th>
                                     <th>Description</th>
+                                    <th>Unit Price</th>
+                                    <th>Amount</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td>{table.values[0].properties.DESCRIPTION?.value}</td>
                                     <td>{table.values[0].properties.QTY?.value}</td>
+                                    <td>{table.values[0].properties.DESCRIPTION?.value}</td>
                                     <td>{table.values[0].properties["UNIT PRICE"]?.value}</td>
                                     <td>{table.values[0].properties.AMOUNT?.value}</td>
                                 </tr>
                                 <tr>
-                                    <td>{table.values[1].properties.DESCRIPTION?.value}</td>
                                     <td>{table.values[1].properties.QTY?.value}</td>
+                                    <td>{table.values[1].properties.DESCRIPTION?.value}</td>
                                     <td>{table.values[1].properties["UNIT PRICE"]?.value}</td>
                                     <td>{table.values[1].properties.AMOUNT?.value}</td>
                                 </tr>
                                 <tr>
-                                    <td>{table.values[2].properties.DESCRIPTION?.value}</td>
                                     <td>{table.values[2].properties.QTY?.value}</td>
+                                    <td>{table.values[2].properties.DESCRIPTION?.value}</td>
                                     <td>{table.values[2].properties["UNIT PRICE"]?.value}</td>
                                     <td>{table.values[2].properties.AMOUNT?.value}</td>
                                 </tr>                                
